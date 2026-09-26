@@ -180,40 +180,20 @@
       margin: 0 0 0.5rem;
     }
 
-    /* Info grid */
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .info-card {
-      background: var(--white);
+    /* Hours sign */
+    .hours-card {
+      max-width: 460px;
+      margin: 0 auto;
+      overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 1.5rem;
-    }
-
-    .hours-card {
-      padding: 0;
-      overflow: hidden;
+      background: var(--white);
     }
 
     .hours-card img {
       display: block;
       width: 100%;
       height: auto;
-    }
-
-    .info-card h3 {
-      font-size: 1.05rem;
-      font-style: italic;
-      color: var(--accent);
-      margin-top: 0;
-    }
-
-    .info-card p {
-      margin: 0.35rem 0;
     }
 
     /* Q&A */
@@ -291,10 +271,6 @@
     @media (min-width: 620px) {
       .hero {
         grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-      }
-
-      .info-grid {
-        grid-template-columns: repeat(2, 1fr);
       }
 
       .gallery {
@@ -412,19 +388,9 @@
       </div>
     </section>
 
-    <section id="visit">
-      <h2>Hours &amp; Location</h2>
-      <div class="info-grid">
-        <div class="info-card">
-          <h3>Store Information</h3>
-          <p>Marie Parie's Boudoir of hand-picked items!</p>
-          <p>508 Main St.<br>Evanston, IL 60202</p>
-          <p><a href="tel:+18474929094">(847) 492-9094</a></p>
-          <p><a href="mailto:info@marieparieboutique.com">info@marieparieboutique.com</a></p>
-        </div>
-        <div class="info-card hours-card">
-          <img src="images/boutique-hours.jpg" alt="Boutique hours: Monday closed; Tuesday through Friday, 11 AM to 6 PM; Saturday and Sunday, 11 AM to 5 PM." width="1008" height="1511" loading="lazy">
-        </div>
+    <section id="visit" aria-label="Boutique hours">
+      <div class="hours-card">
+        <img src="images/boutique-hours.jpg" alt="Boutique hours: Monday closed; Tuesday through Friday, 11 AM to 6 PM; Saturday and Sunday, 11 AM to 5 PM." width="1008" height="1511" loading="lazy">
       </div>
     </section>
   </main>
