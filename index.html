@@ -121,7 +121,8 @@
     }
 
     section {
-      padding: 3rem 0;
+      padding: 2.5rem 0;
+      scroll-margin-top: 7rem;
       border-bottom: 1px solid var(--line);
     }
 
@@ -154,12 +155,23 @@
       max-width: 62ch;
     }
 
+    #social {
+      padding: 1.75rem 2rem;
+      margin: 0 -2rem;
+      background: rgba(247, 227, 232, 0.48);
+    }
+
+    #social h2 { margin-bottom: 0.35rem; }
+    #social p { margin: 0; }
+    #story p { max-width: 72ch; margin-bottom: 0; }
+
     /* Hero */
     .hero {
       display: grid;
       grid-template-columns: 1fr;
       gap: 2rem;
       align-items: center;
+      padding-top: 2.5rem;
     }
 
     .hero-img {
@@ -199,6 +211,8 @@
     /* Q&A */
     .qa-list {
       margin: 0;
+      display: grid;
+      column-gap: 2rem;
     }
 
     .qa-item {
@@ -276,6 +290,23 @@
       .gallery {
         grid-template-columns: repeat(2, 1fr);
       }
+    }
+
+    @media (min-width: 700px) {
+      .qa-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 619px) {
+      main { margin: 0.75rem; padding: 0 1.25rem; }
+      section { padding: 2rem 0; scroll-margin-top: 9rem; }
+      #social { margin: 0 -1.25rem; padding: 1.5rem 1.25rem; }
+      .nav { justify-content: center; padding: 0.65rem 0.75rem; }
+      .brand { width: 100%; text-align: center; margin-right: 0; }
+      .nav-links { justify-content: center; gap: 0.1rem 0.35rem; }
+      .nav-links a { padding: 0.35rem; }
+      .hero { gap: 1.25rem; }
+      .hero-img { margin: 0 auto; }
+      .gallery img { height: auto; aspect-ratio: 4 / 3; }
     }
 
     @media (min-width: 900px) {
