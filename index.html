@@ -9,11 +9,11 @@
     :root {
       --pink: #f34f7c;
       --pink-light: #ff9bb0;
-      --navy: #073a58;
-      --cream: #fff3da;
+      --navy: #171314;
+      --cream: #fffaf4;
       --ink: #181315;
       --muted: #564a4c;
-      --gold: #bf8a32;
+      --gold: #d89c51;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -23,7 +23,7 @@
       font-family: Georgia, "Times New Roman", serif;
       font-size: 1rem;
       line-height: 1.65;
-      background: #ff9cac;
+      background: #ff9cab;
     }
     a { color: var(--navy); }
     a:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
@@ -70,8 +70,38 @@
       background: var(--cream);
       border: 6px solid var(--navy);
       outline: 5px solid var(--pink);
-      border-radius: 38px;
-      box-shadow: 0 16px 0 rgba(7,58,88,.17);
+      border-radius: 11% 11% 8% 8% / 3% 3% 2% 2%;
+      position: relative;
+      box-shadow: inset 0 0 0 5px var(--cream), inset 0 0 0 9px var(--pink), 0 16px 0 rgba(23,19,20,.16);
+    }
+    main::before {
+      content: "⚜";
+      position: absolute;
+      top: -1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4.3rem;
+      height: 2.7rem;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: var(--cream);
+      border: 4px solid var(--pink);
+      border-radius: 50% 50% 42% 42%;
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+    main::after {
+      content: "♡  ⚜  ♡";
+      position: absolute;
+      left: 50%;
+      bottom: -1.05rem;
+      transform: translateX(-50%);
+      padding: 0 .8rem;
+      background: var(--cream);
+      color: var(--pink);
+      font-size: 1.15rem;
+      white-space: nowrap;
     }
     section {
       padding: 2.75rem 0;
@@ -106,7 +136,7 @@
       border: 5px solid var(--navy);
       outline: 5px solid var(--pink-light);
       border-radius: 24px;
-      box-shadow: 9px 10px 0 rgba(7,58,88,.15);
+      box-shadow: 9px 10px 0 rgba(23,19,20,.15);
     }
     .tagline {
       display: inline-block;
@@ -191,9 +221,9 @@
       .brand { width: 100%; text-align: center; margin-right: 0; }
       .nav-links { justify-content: center; gap: 0 .35rem; }
       .nav-links a { font-size: .78rem; padding: .3rem; }
-      main { margin: .85rem; padding: 0 1.25rem; border-width: 4px; outline-width: 3px; border-radius: 25px; }
+      main { margin: .85rem; padding: 0 1.25rem; border-width: 4px; outline-width: 3px; border-radius: 12% 12% 9% 9% / 1.5% 1.5% 1% 1%; }
       section { padding: 2rem 0; scroll-margin-top: 9rem; }
-      .hero { grid-template-columns: 1fr; gap: 1.8rem; }
+      .hero { grid-template-columns: 1fr; gap: 1.8rem; padding-top: 3.2rem; }
       .hero-img { max-width: 290px; }
       #social { margin: 0 -1.25rem; padding: 1.3rem 1.25rem; }
       .qa-list { grid-template-columns: 1fr; }
