@@ -142,7 +142,7 @@ def send_email(kind, fields):
         "content": {"subject": f"Marie Parie website — {title}", "plainText": "\n\n".join(lines)},
         "replyTo": [{"address": fields["email"] if kind == "contact" else INBOX}],
     }
-    poller = EmailClient.from_connection_string(setting("ACS_CONNECTION_STRING")).begin_send(message)
+    client = EmailClient.from_connection_string(setting("ACS_CONNECTION_STRING"))
     poller = client.begin_send(message)
     result = poller.result(timeout=30)
 
