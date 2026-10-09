@@ -4,4 +4,30 @@ document.querySelectorAll('[data-category]').forEach(a=>a.addEventListener('clic
 document.querySelectorAll('.form-open').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.dialog).showModal()));
 document.querySelectorAll('.dialog .close').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}}));
-document.querySelectorAll('.email-form').forEach(form=>form.addEventListener('submit',e=>{e.preventDefault();if(!form.reportValidity())return;const data=new FormData(form),kind=form.dataset.kind;let subject,body;if(kind==='mailing list'){subject='Please add me to the Marie Parie mailing list';body=`First Name: ${data.get('firstName')}\nLast Name: ${data.get('lastName')}\nEmail: ${data.get('email')}\nMobile Phone: ${data.get('phone')||'Not provided'}`;}else{subject='Marie Parie Boutique website contact';body=`First Name: ${data.get('firstName')}\nLast Name: ${data.get('lastName')}\nEmail: ${data.get('email')}\n\nHow May We Help You?\n${data.get('message')}`;}window.location.href=`mailto:bonjour@marieparieboutique.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;}));
+const CONTACT_API="https://marie-parie-contact-api-dhfkcxhbapbyh9b3.centralus-01.azurewebsites.net/api/contact";
+document.querySelectorAll('.email-form').forEach(form=>form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!form.reportValidity())return;
+  const status=form.querySelector('.form-status');
+  const submit=form.querySelector('button[type="submit"]');
+  const token=form.querySelector('input[name="cf-turnstile-response"]')?.value;
+  if(!token){status.textContent="Please complete the security verification.";return;}
+  const data=new FormData(form);
+  const payload={kind:form.dataset.kind,firstName:data.get('firstName'),lastName:data.get('lastName'),
+    email:data.get('email'),turnstileToken:token};
+  if(payload.kind==='contact')payload.message=data.get('message');
+  else {payload.phone=data.get('phone')||'';payload.consent=data.get('consent')==='on';}
+  submit.disabled=true;status.textContent="Sending your message…";
+  try{
+    const response=await fetch(CONTACT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.message||"Unable to send. Please try again.");
+    status.textContent=result.message||"Thank you! Your message has been sent.";
+    form.reset();
+  }catch(error){
+    status.textContent=error.message||"We could not send your message. Please try again.";
+  }finally{
+    submit.disabled=false;
+    if(window.turnstile){const widget=form.querySelector('.cf-turnstile');if(widget)window.turnstile.reset(widget);}
+  }
+}));
