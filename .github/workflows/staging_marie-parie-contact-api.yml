@@ -9,7 +9,7 @@ on:
       - staging
     paths:
       - "api/**"
-      - ".github/workflows/contact-api.yml"
+      - ".github/workflows/staging_marie-parie-contact-api.yml"
 
 permissions:
   contents: read
