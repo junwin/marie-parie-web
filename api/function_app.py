@@ -137,7 +137,7 @@ def send_email(kind, fields):
         lines.append(f"Phone: {fields['phone'] or 'Not provided'}\nMarketing consent: Yes")
 
     message = {
-        "senderAddress": setting("ACS_SENDER_ADDRESS"),
+        "senderAddress":  "DoNotReply@763990b4-98bc-4f8a-913b-be37215dac53.azurecomm.net",
         "recipients": {"to": [{"address": INBOX}]},
         "content": {"subject": f"Marie Parie website — {title}", "plainText": "\n\n".join(lines)},
         "replyTo": [{"address": fields["email"] if kind == "contact" else INBOX}],
