@@ -143,9 +143,8 @@ def send_email(kind, fields):
         "replyTo": [{"address": fields["email"] if kind == "contact" else INBOX}],
     }
     poller = EmailClient.from_connection_string(setting("ACS_CONNECTION_STRING")).begin_send(message)
-    if poller.result(timeout=30).get("status") != "Succeeded":
-        raise RuntimeError("Email delivery not accepted")
-
+    poller = client.begin_send(message)
+    result = poller.result(timeout=30)
 
 def client_ip(req):
     # X-Forwarded-For can be spoofed; use the platform-supplied peer address only.
