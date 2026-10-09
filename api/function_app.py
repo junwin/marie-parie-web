@@ -173,14 +173,7 @@ def contact(req: func.HttpRequest) -> func.HttpResponse:
         stage_start = time.monotonic()
         try:
             result = action()
-            if stage == "turnstile" and not result:
-                logging.warning("contact request_id=%s stage=turnstile result=rejected duration_ms=%d",
-                                request_id, int((time.monotonic() - stage_start) * 1000))
-                return reply(403, "Verification failed. Please try again.")
-            if stage == "rate_limit" and not result:
-                logging.warning("contact request_id=%s stage=rate_limit result=throttled duration_ms=%d",
-                                request_id, int((time.monotonic() - stage_start) * 1000))
-                return reply(429, "Too many submissions. Please try again later.")
+
             logging.info("contact request_id=%s stage=%s result=ok duration_ms=%d",
                          request_id, stage, int((time.monotonic() - stage_start) * 1000))
         except Exception as exc:
