@@ -54,3 +54,30 @@ def test_turnstile_rejects_wrong_hostname(monkeypatch):
     monkeypatch.setattr(module, "settings", lambda key: "secret" if key == "TURNSTILE_SECRET_KEY" else "www.marieparieboutique.com")
     monkeypatch.setattr(module.urllib.request, "urlopen", lambda req, timeout: BytesIO(json.dumps({"success": True, "hostname": "evil.example"}).encode()))
     assert not module.verify_turnstile("token", "127.0.0.1")
+
+
+def test_stage_failure_reports_request_id_without_exposing_exception(monkeypatch):
+    import json
+    import azure.functions as func
+    monkeypatch.setattr(module, "verify_turnstile", lambda token, ip: True)
+    def failing_limit(ip):
+        raise RuntimeError("sensitive storage connection string")
+    monkeypatch.setattr(module, "check_limit", failing_limit)
+    response = module.contact(func.HttpRequest(
+        method="POST", url="https://example.org/api/contact",
+        body=json.dumps(BASE).encode("utf-8")))
+    data = json.loads(response.get_body())
+    assert response.status_code == 503
+    assert data["requestId"] == response.headers["X-Request-ID"]
+    assert "sensitive" not in response.get_body().decode()
+
+
+def test_denied_turnstile_has_request_id(monkeypatch):
+    import json
+    import azure.functions as func
+    monkeypatch.setattr(module, "verify_turnstile", lambda token, ip: False)
+    response = module.contact(func.HttpRequest(
+        method="POST", url="https://example.org/api/contact",
+        body=json.dumps(BASE).encode("utf-8")))
+    assert response.status_code == 403
+    assert json.loads(response.get_body())["requestId"]

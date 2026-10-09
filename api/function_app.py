@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import time
+import uuid
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -143,22 +144,53 @@ def get_ip(req):
 
 @app.route(route="contact", methods=["POST"])
 def contact(req: func.HttpRequest) -> func.HttpResponse:
+    request_id = uuid.uuid4().hex[:12]
+    stage = "request"
+    started = time.monotonic()
+
     def reply(status, msg):
-        return func.HttpResponse(json.dumps({"message": msg}), status_code=status, mimetype="application/json")
+        response = func.HttpResponse(
+            json.dumps({"message": msg, "requestId": request_id}),
+            status_code=status, mimetype="application/json")
+        response.headers["X-Request-ID"] = request_id
+        return response
+
     if len(req.get_body()) > 12000:
+        logging.warning("contact request_id=%s stage=request result=too_large", request_id)
         return reply(413, "Request too large")
     try:
         kind, fields, token = validate(req.get_json())
     except (ValueError, TypeError):
+        logging.warning("contact request_id=%s stage=validation result=rejected", request_id)
         return reply(400, "Please check the form and try again.")
-    try:
-        ip = get_ip(req)
-        if not verify_turnstile(token, ip):
-            return reply(403, "Verification failed. Please try again.")
-        if not check_limit(ip):
-            return reply(429, "Too many submissions. Please try again later.")
-        send_email(kind, fields)
-    except Exception:
-        logging.exception("Marie Parie contact form failed")
-        return reply(503, "We could not send your message. Please try again later.")
+
+    ip = get_ip(req)
+    for stage, action in (
+        ("turnstile", lambda: verify_turnstile(token, ip)),
+        ("rate_limit", lambda: check_limit(ip)),
+        ("email", lambda: send_email(kind, fields)),
+    ):
+        stage_start = time.monotonic()
+        try:
+            result = action()
+            if stage == "turnstile" and not result:
+                logging.warning("contact request_id=%s stage=turnstile result=rejected duration_ms=%d",
+                                request_id, int((time.monotonic() - stage_start) * 1000))
+                return reply(403, "Verification failed. Please try again.")
+            if stage == "rate_limit" and not result:
+                logging.warning("contact request_id=%s stage=rate_limit result=throttled duration_ms=%d",
+                                request_id, int((time.monotonic() - stage_start) * 1000))
+                return reply(429, "Too many submissions. Please try again later.")
+            logging.info("contact request_id=%s stage=%s result=ok duration_ms=%d",
+                         request_id, stage, int((time.monotonic() - stage_start) * 1000))
+        except Exception as exc:
+            # Do not log exc messages or tracebacks: Azure SDK HTTP exceptions
+            # can include PII, request payloads, or sensitive header values.
+            logging.error("contact request_id=%s stage=%s result=error exception_type=%s duration_ms=%d",
+                          request_id, stage, type(exc).__name__,
+                          int((time.monotonic() - stage_start) * 1000))
+            return reply(503, "We could not send your message. Please try again later.")
+
+    logging.info("contact request_id=%s result=success duration_ms=%d",
+                 request_id, int((time.monotonic() - started) * 1000))
     return reply(200, "Thank you! Your message has been sent.")
