@@ -1,1 +1,44 @@
+# Azure Function deployment is separate from the static website workflows.
+# Requires federated identity (OIDC) configured for this workflow's GitHub branch.
+name: Deploy Marie Parie Contact API
 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - staging
+    paths:
+      - "api/**"
+      - ".github/workflows/contact-api.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install and test dependencies
+        run: |
+          python -m pip install -r api/requirements.txt pytest
+          python -m pytest api/tests -q
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MARIE_PARIE_FUNCTION_CLIENT_ID }}
+          tenant-id: ${{ secrets.MARIE_PARIE_FUNCTION_TENANT_ID }}
+          subscription-id: ${{ secrets.MARIE_PARIE_FUNCTION_SUBSCRIPTION_ID }}
+      - name: Deploy Functions from api directory
+        uses: Azure/functions-action@v1
+        with:
+          app-name: marie-parie-contact-api
+          package: api
+          remote-build: true
