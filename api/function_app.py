@@ -182,15 +182,15 @@ def contact(req: func.HttpRequest) -> func.HttpResponse:
                           int((time.monotonic() - stage_start) * 1000))
             # TEMPORARY staging-only diagnostics. No exception messages, payloads or secrets.
             # Disable via CONTACT_DIAGNOSTICS=false before promotion to production.
-            if os.getenv("CONTACT_DIAGNOSTICS", "").lower() == "true":
-                response = func.HttpResponse(
-                    json.dumps({"message": "We could not send your message. Please try again later.",
-                                "requestId": request_id, "failedStage": stage,
-                                "exceptionType": type(exc).__name__}),
-                    status_code=503, mimetype="application/json")
-                response.headers["X-Request-ID"] = request_id
-                return response
-            return reply(503, "We could not send your message. Please try again later.")
+            # if os.getenv("CONTACT_DIAGNOSTICS", "").lower() == "true":
+            response = func.HttpResponse(
+                json.dumps({"message": "We could not send your message. Please try again later.",
+                            "requestId": request_id, "failedStage": stage,
+                            "exceptionType": type(exc).__name__}),
+                status_code=503, mimetype="application/json")
+            response.headers["X-Request-ID"] = request_id
+            return response
+            # return reply(503, "We could not send your message. Please try again later.")
 
     logging.info("contact request_id=%s result=success duration_ms=%d",
                  request_id, int((time.monotonic() - started) * 1000))
