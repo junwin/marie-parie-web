@@ -2,7 +2,7 @@
 
 Simple website for **Marie Parie Boutique**.
 
-The site is intentionally lightweight and can be deployed as a static front end to an Azure App Service.
+The website is a lightweight static front end; no build step is required.
 
 ## Files
 
@@ -10,14 +10,12 @@ The site is intentionally lightweight and can be deployed as a static front end 
 
 ## Deployment
 
-The repository is connected to Azure App Service through **Deployment Center / GitHub Actions**.
+- `main` deploys to the live Marie Parie website using the existing production deployment.
+- `staging` is published through **Cloudflare**, which Arla uses to review changes before production.
+- **Do not deploy the static staging website to Azure App Service.** The Azure staging App Service plan hit quota/tariff limits and blocked GitHub deployments. Its GitHub Actions workflow was removed.
+- The **Azure contact API is separate**: changes under `api/` can still trigger the dedicated contact API workflow. Do not disable it when making changes to the static website deployment.
 
-- `main` deploys to the live Marie Parie website.
-- `staging` deploys to the staging website used for review and approval before release.
-
-For a simple Windows App Service deployment, the published site content should end up under:
-
-`site/wwwroot`
+Cloudflare is the authoritative preview site for the `staging` branch. Be sure Cloudflare Turnstile and the Azure contact API allow the staging hostname before testing form submissions.
 
 ## Development
 
@@ -38,7 +36,7 @@ work / feature branches
 The branch roles are:
 
 - **`main`** — production only. This is the version currently intended for the live public website.
-- **`staging`** — the integration and review branch. Changes merged here are deployed to the staging website so Arla and Heidi can review them before they go live.
+- **`staging`** — integration and review branch, automatically published to Cloudflare for Arla and Heidi to review before release.
 - **Work branches** — create all normal development branches from `staging`, not from `main`. Examples: `feature/homepage-update`, `feature/new-collection`, or `fix/mobile-layout`.
 
 The normal procedure is:
@@ -47,14 +45,14 @@ The normal procedure is:
 2. Create a work/feature/fix branch from `staging`.
 3. Make and test the change on that work branch.
 4. Merge the work branch back into `staging`.
-5. Review the deployed staging website.
-6. When the changes are approved for production, merge `staging` into `main`.
+5. Review the Cloudflare staging website.
+6. When approved for production, merge `staging` into `main`.
 7. Do not merge ordinary work branches directly into `main`.
 
 In short:
 
 ```text
-work branch → staging → main
+work branch → staging (Cloudflare preview) → main (production)
 ```
 
 When assisting with repository changes, ChatGPT or any other automated development tool should consult and follow this branch policy before creating branches, pull requests, or merges.
