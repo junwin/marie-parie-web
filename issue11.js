@@ -21,7 +21,7 @@ document.querySelectorAll('.email-form').forEach(form=>form.addEventListener('su
   try{
     const response=await fetch(CONTACT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(result.message||"Unable to send. Please try again.");
+    if(!response.ok)throw new Error((result.message||"Unable to send. Please try again.")+(result.requestId?` (Reference: ${result.requestId})`:""));
     status.textContent=result.message||"Thank you! Your message has been sent.";
     form.reset();
   }catch(error){
