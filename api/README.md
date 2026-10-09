@@ -16,3 +16,10 @@ Create Azure Table `MarieParieFormLimits` in Function storage (or ensure it exis
 The frontend needs the Turnstile public **site key** and the endpoint URL. A client site key is not a secret. Set allowed origins on Function App CORS to the staging and production websites. CORS is browser isolation only, not a security boundary. The endpoint is intentionally anonymous because the public website cannot safely store a Function key.
 
 Never merge into staging until a deployed Function endpoint and Turnstile site key are configured and tested. Deleting the WordPress deployment must not delete the two ACS resources.
+
+## Public Turnstile widget
+
+Cloudflare Turnstile **site key** (public, safe for browser): `0x4AAAAAAFR4-OgtnoP1yPRi`.
+Use this for both form widgets on the approved hostnames. Keep the separately generated **secret key** only in the Function App setting `TURNSTILE_SECRET_KEY`.
+
+Do **not** change live form submission behavior until `POST /api/contact` is deployed, its public URL is known, CORS/allowed hostnames are configured, and end-to-end test email delivery succeeds. Existing staging forms currently still use mailto.
