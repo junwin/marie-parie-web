@@ -166,8 +166,6 @@ def contact(req: func.HttpRequest) -> func.HttpResponse:
 
     ip = get_ip(req)
     for stage, action in (
-        ("turnstile", lambda: verify_turnstile(token, ip)),
-        ("rate_limit", lambda: check_limit(ip)),
         ("email", lambda: send_email(kind, fields)),
     ):
         stage_start = time.monotonic()
