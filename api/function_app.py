@@ -170,8 +170,21 @@ def contact(req: func.HttpRequest) -> func.HttpResponse:
     except (ValueError, TypeError):
         return reply(400, "Please check the form and try again.")
 
-    # if not verify_turnstile(token, client_ip(req)):
-    #    return reply(400, "Please check the form and try again.")
+    try:
+        verified = verify_turnstile(token, client_ip(req))
+    except Exception:
+        # Cloudflare or configuration failures must not bypass verification.
+        # Avoid logging tokens, secrets, submitted data, or raw exception details.
+        logging.error("contact request_id=%s result=error stage=turnstile",
+                      request_id)
+        return reply(503, "Security verification is temporarily unavailable. Please try again.",
+                     failedStage="turnstile")
+
+    if not verified:
+        logging.info("contact request_id=%s result=rejected stage=turnstile",
+                     request_id)
+        return reply(400, "Security verification failed. Please try again.",
+                     failedStage="turnstile")
 
     # if not check_rate_limit(client_ip(req)):
     #     return reply(429, "Too many requests. Please try again later.")
