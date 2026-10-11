@@ -7,9 +7,6 @@ on:
   push:
     branches:
       - staging
-    paths:
-      - "api/**"
-      - ".github/workflows/staging_marie-parie-contact-api.yml"
 
 permissions:
   contents: read

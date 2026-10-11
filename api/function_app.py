@@ -73,7 +73,7 @@ def validate(data):
     return kind, fields, token
 
 
-def verify_turnstile(token, remote_ip):
+def verify_turnstile(token, remote_ip, request_id):
     payload = urllib.parse.urlencode({
         "secret": setting("TURNSTILE_SECRET_KEY"),
         "response": token,
@@ -85,7 +85,28 @@ def verify_turnstile(token, remote_ip):
     with urllib.request.urlopen(request, timeout=8) as response:
         result = json.load(response)
     allowed = {h.strip().lower() for h in setting("TURNSTILE_ALLOWED_HOSTNAMES").split(",") if h.strip()}
-    return result.get("success") is True and str(result.get("hostname", "")).lower() in allowed
+    hostname = str(result.get("hostname", "")).lower()
+    error_codes = result.get("error-codes", [])
+    if not isinstance(error_codes, list):
+        error_codes = [str(error_codes)]
+    debug = {
+        "success": result.get("success") is True,
+        "hostname": hostname or None,
+        "hostnameAllowed": hostname in allowed,
+        "errorCodes": [str(code) for code in error_codes],
+        "responseFields": sorted(str(key) for key in result if key != "error-codes"),
+    }
+    logging.info(
+        "turnstile request_id=%s success=%s hostname=%s allowed_hostname=%s "
+        "error_codes=%s response_fields=%s",
+        request_id,
+        debug["success"],
+        hostname or "missing",
+        debug["hostnameAllowed"],
+        ",".join(debug["errorCodes"]) or "none",
+        ",".join(debug["responseFields"]),
+    )
+    return debug["success"] and debug["hostnameAllowed"], debug
 
 
 def bump_counter(table, partition, row, limit):
@@ -170,6 +191,16 @@ def contact(req: func.HttpRequest) -> func.HttpResponse:
     except (ValueError, TypeError):
         return reply(400, "Please check the form and try again.")
 
+    try:
+        turnstile_ok, turnstile_debug = verify_turnstile(token, client_ip(req), request_id)
+    except Exception as exc:
+        logging.error("turnstile request_id=%s result=error exception_type=%s",
+                      request_id, type(exc).__name__)
+        return reply(503, "Verification is temporarily unavailable. Please try again later.",
+                     failedStage="turnstile")
+    if not turnstile_ok:
+        return reply(403, "Verification failed. Please try again.",
+                     failedStage="turnstile", turnstileDebug=turnstile_debug)
 
 
     # if not check_rate_limit(client_ip(req)):
